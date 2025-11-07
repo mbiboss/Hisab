@@ -1,10 +1,13 @@
 const CACHE_VERSION = 'v2';
 const OFFLINE_FILES = [
-  '/index.html',
-  '/style.css', 
-  '/script.js',
-  '/logo.png',
-  '/manifest.json'
+  '/Hisab/',
+  '/Hisab/index.html',
+  '/Hisab/style.css', 
+  '/Hisab/script.js',
+  '/Hisab/logo.png',
+  '/Hisab/app-icon-192.png',
+  '/Hisab/app-icon-512.png',
+  '/Hisab/manifest.json'
 ];
 
 self.addEventListener('install', (event) => {

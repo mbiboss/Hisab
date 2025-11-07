@@ -77,9 +77,9 @@ function renderTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><input class="input-cell date-input" value="${r.date}" data-index="${idx}"/></td>
-      <td><input class="input-cell in-input" value="${r.in || ''}" data-index="${idx}"/></td>
-      <td><input class="input-cell out-input" value="${r.out || ''}" data-index="${idx}"/></td>
-      <td><input class="input-cell ot-input" value="${r.ot || ''}" data-index="${idx}"/></td>
+      <td><input class="input-cell in-input" inputmode="numeric" pattern="[0-9]*" value="${r.in || ''}" data-index="${idx}"/></td>
+      <td><input class="input-cell out-input" inputmode="numeric" pattern="[0-9]*" value="${r.out || ''}" data-index="${idx}"/></td>
+      <td><input class="input-cell ot-input" inputmode="numeric" pattern="[0-9]*" value="${r.ot || ''}" data-index="${idx}"/></td>
       <td><input class="input-cell note-input" placeholder="${placeholder}" value="${r.note || ''}" data-index="${idx}"/></td>
       <td><button class="small-btn del" data-index="${idx}" title="Delete">✕</button></td>
     `;
@@ -115,7 +115,63 @@ function checkMonthCompletion() {
   }
 }
 
-function attachTableListeners() { $$('.input-cell').forEach(inp => { inp.oninput = (e) => { const idx = Number(e.target.dataset.index); const globalIndex = findGlobalIndexByDisplayedIndex(idx); if (globalIndex === -1) return; const t = e.target; if (t.classList.contains('date-input')) appState.rows[globalIndex].date = t.value; else if (t.classList.contains('in-input')) appState.rows[globalIndex].in = t.value; else if (t.classList.contains('out-input')) appState.rows[globalIndex].out = t.value; else if (t.classList.contains('ot-input')) appState.rows[globalIndex].ot = t.value; else if (t.classList.contains('note-input')) appState.rows[globalIndex].note = t.value; saveState(false); updateTotals(); }; }); $$('.del').forEach(b => b.onclick = (e) => { const idx = Number(e.target.dataset.index); const globalIndex = findGlobalIndexByDisplayedIndex(idx); if (globalIndex > -1) { appState.rows.splice(globalIndex, 1); saveState(); renderTable(); } }); }
+function attachTableListeners() { 
+  $$('.input-cell').forEach(inp => { 
+    // Add keypress validation for numeric inputs
+    if (inp.classList.contains('in-input') || inp.classList.contains('out-input') || inp.classList.contains('ot-input')) {
+      inp.addEventListener('keypress', (e) => {
+        // Allow only numbers and decimal point
+        if (!/[0-9.]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+          e.preventDefault();
+        }
+      });
+    }
+    
+    inp.oninput = (e) => { 
+      const idx = Number(e.target.dataset.index); 
+      const globalIndex = findGlobalIndexByDisplayedIndex(idx); 
+      if (globalIndex === -1) return; 
+      const t = e.target; 
+      
+      if (t.classList.contains('date-input')) {
+        appState.rows[globalIndex].date = t.value;
+      } else if (t.classList.contains('in-input')) { 
+        const numValue = t.value.replace(/[^0-9.]/g, ''); 
+        if (t.value !== numValue) {
+          t.value = numValue;
+        }
+        appState.rows[globalIndex].in = numValue; 
+      } else if (t.classList.contains('out-input')) { 
+        const numValue = t.value.replace(/[^0-9.]/g, ''); 
+        if (t.value !== numValue) {
+          t.value = numValue;
+        }
+        appState.rows[globalIndex].out = numValue; 
+      } else if (t.classList.contains('ot-input')) { 
+        const numValue = t.value.replace(/[^0-9.]/g, ''); 
+        if (t.value !== numValue) {
+          t.value = numValue;
+        }
+        appState.rows[globalIndex].ot = numValue; 
+      } else if (t.classList.contains('note-input')) {
+        appState.rows[globalIndex].note = t.value;
+      }
+      
+      saveState(false); 
+      updateTotals(); 
+    }; 
+  }); 
+  
+  $$('.del').forEach(b => b.onclick = (e) => { 
+    const idx = Number(e.target.dataset.index); 
+    const globalIndex = findGlobalIndexByDisplayedIndex(idx); 
+    if (globalIndex > -1) { 
+      appState.rows.splice(globalIndex, 1); 
+      saveState(); 
+      renderTable(); 
+    } 
+  }); 
+}
 function findGlobalIndexByDisplayedIndex(displayedIndex) { const filtered = appState.rows.map((r, i) => { const d = parseDMYString(r.date); return { r, i, ok: d && d.getMonth() === appState.month.getMonth() && d.getFullYear() === appState.month.getFullYear() }; }).filter(x => x.ok); if (displayedIndex < 0 || displayedIndex >= filtered.length) return -1; return filtered[displayedIndex].i; }
 
 /* ------------------ add row ------------------ */
@@ -484,11 +540,7 @@ tapStart.addEventListener('click', (e) => {
   startApp();
 });
 
-window.addEventListener('load', () => createDynamicManifest());
-
-async function registerServiceWorker() { if ('serviceWorker' in navigator) { try { const reg = await navigator.serviceWorker.register('sw.js', { scope: './' }); console.log('sw registered', reg); } catch (e) { console.warn('sw register failed', e); } } }
-
-function createDynamicManifest() { const manifest = { name: 'আজকের হিসাব', short_name: 'হিসাব', start_url: '.', display: 'standalone', background_color: '#0b1020', theme_color: '#0b1020', icons: [{ src: 'logo.png', sizes: '192x192', type: 'image/png' }] }; const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }); const url = URL.createObjectURL(blob); const link = document.querySelector('link[rel="manifest"]') || document.createElement('link'); link.rel = 'manifest'; link.href = url; document.head.appendChild(link); }
+async function registerServiceWorker() { if ('serviceWorker' in navigator) { try { const reg = await navigator.serviceWorker.register('/Hisab/sw.js', { scope: '/Hisab/' }); console.log('sw registered', reg); } catch (e) { console.warn('sw register failed', e); } } }
 
 function warmCache() { if ('serviceWorker' in navigator) { try { navigator.serviceWorker.ready.then(reg => reg.active?.postMessage({ type: 'warm-cache' })); } catch (e) { } } }
 warmCache();

@@ -1,9 +1,25 @@
 {
   "name": "আজকের হিসাব",
   "short_name": "হিসাব",
-  "start_url": ".",
+  "description": "A mobile-first accounting/ledger system with Bengali language support",
+  "start_url": "/Hisab/",
+  "scope": "/Hisab/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#000000",
-  "theme_color": "#000000",
-  "icons": [ {"src":"logo.png","sizes":"192x192","type":"image/png"} ]
+  "theme_color": "#0b1020",
+  "icons": [
+    {
+      "src": "/Hisab/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Hisab/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
